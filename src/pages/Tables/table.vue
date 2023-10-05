@@ -50,9 +50,13 @@ onMounted(async () => {
     loadMore();
 });
 
-onUpdated(() => {
+let timer = setInterval(() => {
     isMobile();
-});
+}, 100)
+
+onBeforeUnmount(() => {
+    clearInterval(timer)
+})
 
 const fetchJsonData = async (): Promise<void> => {
     await axios
@@ -147,15 +151,6 @@ const sortingByField = (sortingField: string): void => {
     }
 }
 
-// watch(isMobileDevice, () => {
-//     // if (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent)) {
-//     if (screen.width <= 760) {
-//         isMobileDevice.value = true
-//     } else {
-//         isMobileDevice.value = false
-//     }
-// })
-
 const isMobile = () => {
     if (screen.width <= 760) {
         isMobileDevice.value = true
@@ -185,45 +180,35 @@ const getSizeValue = (e: Event) => {
     <div v-if="isMobileDevice && dataLoaded">
         <!-- <Filter v-model="searchField" />
         <Search v-model="searchValue" :searchField="searchField" /> -->
-        <table class="table is-hoverable is-fullwidth">
-            <thead>
-                <tr>
-                    <th scope="col">Name&nbsp; <button @click="sortingByField('name')" style="font-size:10px"> <i
-                                class="fa fa-sort"></i></button></th>
-                    <th scope="col">Date &nbsp;<button @click="sortingByField('date')" style="font-size:10px"> <i
-                                class="fa fa-sort"></i></button></th>
-                    <th scope="col">Amount&nbsp;<button @click="sortingByField('amount')" style="font-size:10px"> <i
-                                class="fa fa-sort"></i></button></th>
-                    <th scope="col">Address&nbsp;<button @click="sortingByField('address')" style="font-size:10px"> <i
-                                class="fa fa-sort"></i></button></th>
-                    <th scope="col">Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr v-for="res in data.mobiledata">
-                    <template v-if="res">
-                        <td>{{ res?.name || '---' }}</td>
+        <div class="card has-text-centered is-dark">
+            <h5 class="card-title p-2 mx-6">Employee Details</h5>
+        </div>
 
-                        <td>{{ res?.date || '---' }}</td>
+        <div v-for="res in data.mobiledata" class="card border-success mb-3" style="max-width: 45rem;">
+            <div class="card-body text-success">
 
-                        <td>{{ formatAmount(res?.amount || 0) }}</td>
+                <h5 class="card-title text-dark">Name - {{ res.name }}</h5>
+                <h5 class="card-title">Date - {{ res.date }}</h5>
 
-                        <td>{{ res?.address || '---' }}</td>
-
-                        <td>
-                            <VButton @click="deleteData(res.name)" class="button" color="primary">Delete</VButton>
-                        </td>
-                    </template>
-                </tr>
-            </tbody>
-        </table>
-        <div class="box has-text-centered">
-            <button :disabled="data.tableData.length <= loadMoreValue" class="button is-success is-rounded mr-6"
-                @click="loadMore()">Load More ...</button>
+                <h5 class="card-title">Address - {{ res.address }}</h5>
+                <h5 class="card-title">Amount - ${{ res.amount }}</h5>
+                <div class="box has-text-centered">
+                    <VButton icon="fas fa-trash" @click="deleteData(res.name)" class="button" color="primary">
+                        Delete
+                    </VButton>
+                </div>
+            </div>
+        </div>
+        <div>
+            <div class="box has-text-centered">
+                <button :disabled="data.tableData.length <= loadMoreValue" class="button is-dark is-rounded mx-6"
+                    @click="loadMore()">Load More ...</button>
+            </div>
         </div>
     </div>
 
-    <div v-if="dataLoaded && !isMobileDevice" class="container is-fluid" style="float: left">
+
+    <div v-if="dataLoaded && !isMobileDevice && results.length" class="container is-fluid" style="float: left">
         <span>
             <Filter v-model="searchField" />
             <Search v-model="searchValue" :searchField="searchField" />
@@ -252,7 +237,7 @@ const getSizeValue = (e: Event) => {
                 </tr>
             </thead>
             <tbody>
-                <tr v-for="res in results">
+                <tr v-for=" res  in  results ">
                     <template v-if="res">
                         <td>{{ res?.name || '---' }}</td>
 
@@ -269,6 +254,7 @@ const getSizeValue = (e: Event) => {
                                 @click="editData(res.name)" class="button mx-2" color="primary">Edit</VButton>
                         </td>
                     </template>
+
                 </tr>
             </tbody>
         </table>
